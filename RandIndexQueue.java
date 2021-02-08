@@ -34,8 +34,10 @@ public class RandIndexQueue<T>
         // if array is full, resize
         else if (count == queue.length)
         {
-            // resize();
-            // queue[count - 1] = newEntry
+            resize();
+            queue[count] = newEntry;
+            count ++;
+            back ++;
         }
 
         // if there is no space at end of array, place new entry at beginning
@@ -57,9 +59,32 @@ public class RandIndexQueue<T>
         
     }
 
-    private void resize()
+    public void resize() // CHANGE BACK TO PRIVATE AFTER TESTING!!!
     {
-        
+        // Create an array 2x the size of current array
+        T[] biggerQueue = (T[]) new Object[queue.length * 2];
+
+        // Copy old values to new array
+        for(int i = 0 ; i < queue.length ; i++)
+        {
+            if(front < back || (front + i) <= (queue.length - 1))
+            {
+                biggerQueue[i] = queue[front + i]; 
+            }
+
+            else
+            {
+                biggerQueue[i] = queue[i - (queue.length - front)];
+            }
+              
+        }
+
+        queue = biggerQueue;
+        front = 0;
+        back = count - 1;
+
+
+
     }
 
     // Remove and return object at front of array
@@ -77,7 +102,7 @@ public class RandIndexQueue<T>
 
             // if front is at end of array & is not the last item,
             // move front to beginning
-            if((front == queue.length - 1) & (front != back))
+            if((front == queue.length - 1) && (front != back))
             {
                 front = 0;
                 count --;
@@ -119,7 +144,8 @@ public class RandIndexQueue<T>
        String retString = "\nFront: " + front +
                     "\nBack: " + back +
                     "\nCount: " + count +
-                    "\nQueue: ";
+                    "\nLength: " + queue.length +
+                    "\nQueue: " ;
 
         for (T item : queue)
         {
