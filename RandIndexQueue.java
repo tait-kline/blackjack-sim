@@ -12,6 +12,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
     // that the array is empty
     public RandIndexQueue(int size)
     {
+        
         queue = (T[]) new Object[size];
         count = 0;
         front = -1;
@@ -188,9 +189,9 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
         {
             // if index + i wraps around to front of array,
             // subtract distance from front to end of array from i
-            if(front + i > count - 1)
+            if(front + i > queue.length - 1)
             {
-                return queue[i - (count - front)];
+                return queue[i - (queue.length - front)];
             }
 
             // else, just return at front + i
@@ -215,9 +216,9 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
         {
             // if index + i wraps around to front of array,
             // subtract distance from front to end of array from i
-            if(front + i > count - 1)
+            if(front + i > queue.length - 1)
             {
-                queue[i - (count - front)] = item;
+                queue[i - (queue.length - front)] = item;
             }
 
             // else, just set at front + i
@@ -261,7 +262,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
         Random rng = new Random();
 
         // for every item in the queue, randomly select and swap two items
-        for(int i = 0 ; i < count - 1 ; i++)
+        for(int i = 0 ; i < count  ; i++)
         {
             int randIndex1 = rng.nextInt(count);
             int randIndex2 = rng.nextInt(count);
@@ -269,31 +270,59 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
             T temp = get(randIndex1);
 
             // swap indexes
-            queue[randIndex1] = queue[randIndex2];
-            queue[randIndex2] = temp;
+            set(randIndex1, get(randIndex2));
+            set(randIndex2, temp);
+            
         }
+    }
+
+    public boolean equals(RandIndexQueue<T> rhs)
+    {
+        boolean equal = true;
+
+        if(this.count != rhs.count)
+        {
+            equal = false;
+        }
+
+        else
+        {
+            for(int i = 0 ; i < count ; i++)
+            {
+
+                if(!this.get(i).equals(rhs.get(i)))
+                {
+                    equal = false;
+                }
+            }
+        }
+
+        return equal;
     }
 
 
     public String toString()
     {
-       String retString = "\nFront: " + front +
+        String retString = "Contents: ";
+        /* testing
+        
+        retString = "\nFront: " + front +
                     "\nBack: " + back +
                     "\nCount: " + count +
                     "\nLength: " + queue.length +
                     "\nQueue: " ;
+        */
+    
 
-        for (T item : queue)
+        for (int i = 0 ; i < count ; i++)
         {
-            retString += (item + " ");
+            T item = get(i);
+            retString += item + " ";
         }
 
         return retString;
 
         
     }
-
-
-
-    
+   
 }
