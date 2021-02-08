@@ -1,11 +1,12 @@
-
-public class RandIndexQueue<T>
+import java.util.Random;
+public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
 {
     private int front;  // index of logical front of array
     private int back;   // index of logical back of array 
     private int count;  // logical size of array (number of objects in array)
+    private int moves; // number of operations performed during enqueue() & dequeue()
 
-    public T[] queue; // SET BACK TO PRIVATE AFTER TESTING!!!
+    private T[] queue;
 
     // constructor that sets fornt and back to -1, this value will indicate
     // that the array is empty
@@ -16,6 +17,25 @@ public class RandIndexQueue<T>
         front = -1;
         back = -1;
     }
+
+    // copy constructor
+    public RandIndexQueue (RandIndexQueue<T> old)
+    {
+        // create deep copy of array
+        queue = (T[]) new Object[old.queue.length];
+
+        for(int i = 0 ; i < queue.length ; i++)
+        {
+            queue[i] = old.queue[i];
+        }
+
+        count = old.count;
+        front = old.front;
+        back = old.back;
+
+    }
+
+
 
 
     public void enqueue(T newEntry)
@@ -29,6 +49,7 @@ public class RandIndexQueue<T>
             front++;   // front & back are now both 0
             back++;    // becauase we only have 1 object in array    
             count ++;
+            moves ++;
         }
 
         // if array is full, resize
@@ -38,6 +59,7 @@ public class RandIndexQueue<T>
             queue[count] = newEntry;
             count ++;
             back ++;
+            moves ++;
         }
 
         // if there is no space at end of array, place new entry at beginning
@@ -46,6 +68,7 @@ public class RandIndexQueue<T>
             queue[0] = newEntry;
             back = 0;   // set back to 0
             count ++;
+            moves ++;
             
         }
 
@@ -54,51 +77,26 @@ public class RandIndexQueue<T>
         {
             queue[back + 1] = newEntry;
             back ++;
-            count++;
+            count ++;
+            moves ++;
         }
         
     }
 
-    public void resize() // CHANGE BACK TO PRIVATE AFTER TESTING!!!
-    {
-        // Create an array 2x the size of current array
-        T[] biggerQueue = (T[]) new Object[queue.length * 2];
-
-        // Copy old values to new array
-        for(int i = 0 ; i < queue.length ; i++)
-        {
-            if(front < back || (front + i) <= (queue.length - 1))
-            {
-                biggerQueue[i] = queue[front + i]; 
-            }
-
-            else
-            {
-                biggerQueue[i] = queue[i - (queue.length - front)];
-            }
-              
-        }
-
-        queue = biggerQueue;
-        front = 0;
-        back = count - 1;
-
-
-
-    }
 
     // Remove and return object at front of array
     public T dequeue()
     {
         if (isEmpty())
         {
-            throw new EmptyQueueException("Error: Queue is empty.");
+            throw new EmptyQueueException("Queue is empty.");
         }
 
         else
         {
             T frontEntry = queue[front];
             queue[front] = null;
+            moves ++;
 
             // if front is at end of array & is not the last item,
             // move front to beginning
@@ -124,20 +122,158 @@ public class RandIndexQueue<T>
 
             }
             
-           
-
             return frontEntry;
         }
+        
+    }
 
-        
-    
-        
+    public T getFront()
+    {
+        if(isEmpty())
+        {
+            throw new EmptyQueueException("Queue is empty.");
+        }
+
+        else
+        {
+            return queue[front]; // Should this make a copy before returning?????
+        }
+    }
+
+    public void clear()
+    {
+        queue = (T[]) new Object[queue.length];
+
+        // reset class variables
+        count = 0;
+        front = -1;
+        back = -1;
+
     }
 
     public boolean isEmpty()
     {
         return count == 0;
     }
+
+    public int size()
+    {
+        return count;
+    }
+
+    public int capacity()
+    {
+        return queue.length;
+    }
+
+    public int getMoves()
+    {
+        return moves;
+    }
+
+    public void setMoves(int moves)
+    {
+        this.moves = moves;
+    }
+
+    public T get(int i)
+    {
+        // if argument is greater than # of items in queue, throw exception
+        if(i > count - 1)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        else
+        {
+            // if index + i wraps around to front of array,
+            // subtract distance from front to end of array from i
+            if(front + i > count - 1)
+            {
+                return queue[i - (count - front)];
+            }
+
+            // else, just return at front + i
+            else
+            {
+                return queue[front + i];
+            }
+
+        }
+
+    }
+
+    public void set(int i, T item)
+    {
+        // if argument is greater than # of items in queue, throw exception
+        if(i > count - 1)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+
+        else
+        {
+            // if index + i wraps around to front of array,
+            // subtract distance from front to end of array from i
+            if(front + i > count - 1)
+            {
+                queue[i - (count - front)] = item;
+            }
+
+            // else, just set at front + i
+            else
+            {
+                queue[front + i] = item;
+            }
+
+        }
+
+    }
+	
+
+    private void resize()
+    {
+        // Create an array 2x the size of current array
+        T[] biggerQueue = (T[]) new Object[queue.length * 2];
+
+        // Copy old values to new array
+        for(int i = 0 ; i < queue.length ; i++)
+        {
+            if(front < back || (front + i) <= (queue.length - 1))
+            {
+                biggerQueue[i] = queue[front + i]; 
+            }
+
+            else
+            {
+                biggerQueue[i] = queue[i - (queue.length - front)];
+            }
+              
+        }
+
+        queue = biggerQueue;
+        front = 0;
+        back = count - 1;
+    }
+
+    public void shuffle()
+    {
+        Random rng = new Random();
+
+        // for every item in the queue, randomly select and swap two items
+        for(int i = 0 ; i < count - 1 ; i++)
+        {
+            int randIndex1 = rng.nextInt(count);
+            int randIndex2 = rng.nextInt(count);
+
+            T temp = get(randIndex1);
+
+            // swap indexes
+            queue[randIndex1] = queue[randIndex2];
+            queue[randIndex2] = temp;
+        }
+    }
+
 
     public String toString()
     {
