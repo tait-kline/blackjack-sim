@@ -1,3 +1,6 @@
+// Tait Kline
+// This class was created to store card objects and has the ability to
+// return the total value of a Blackjack card hand. 
 public class BlackjackCards extends RandIndexQueue<Card>
 {
     public BlackjackCards(int size)

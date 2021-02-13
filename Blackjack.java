@@ -1,173 +1,257 @@
-public class Main 
+// Tait Kline
+// This is the class that holds the main function of my Blackjack program.
+public class Blackjack
 {
-    public static void main(String[] args)
+    static BlackjackCards shoe;
+    static BlackjackCards discardPile;
+    static BlackjackCards playerHand;
+    static BlackjackCards dealerHand;
+
+    static int dealerWins = 0;
+    static int playerWins = 0;
+    static int ties = 0;
+
+    static StringBuilder traceString = new StringBuilder(); // Used to keep track of trace output
+
+
+    // Initializes and returns shoe
+    public static void initializeShoe(int numOfDecks)
     {
-
-        // initialize
-
-        BlackjackCards shoe = new BlackjackCards(52); // multiply by Num of decks later!
-        int dealerWins = 0;
-        int playerWins = 0;
-        int ties = 0;
-        boolean gameOver = false;
-
-        // Create cards for the shoe
-        // LOOP THIS FOR # OF SHOES NEEDED!
-        for (Card.Suits s: Card.Suits.values())
+        shoe = new BlackjackCards(52 * numOfDecks);
+         // Create cards for the shoe
+         // This loop will repeat itereate for every deck needed
+        for(int i = 0 ; i < numOfDecks ; i++)
         {
-            for (Card.Ranks r: Card.Ranks.values())
+            for (Card.Suits s: Card.Suits.values())
             {
-                // Creating 2 cards for every suit and rank
-                // and adding them to the shoe
-                Card c1 = new Card(s, r);
-		        Card c2 = new Card(s, r);
-
-                shoe.enqueue(c1);
-                shoe.enqueue(c2);
-
-
+                for (Card.Ranks r: Card.Ranks.values())
+                {
+                    // Creating 2 cards for every suit and rank
+                    // and adding them to the shoe
+                    Card c1 = new Card(s, r);
+                    
+                    shoe.enqueue(c1);
+                }
             }
+
         }
 
         shoe.shuffle();
+    }
 
-        System.out.println(shoe);
-
-        BlackjackCards playerHand = new BlackjackCards(5);
-        BlackjackCards dealerHand = new BlackjackCards(5);
-
-        ////////////////////////////////////////////////////////////////
-
-        // initial deal//
+    public static void dealCards()
+    {
         playerHand.enqueue(shoe.dequeue());
         dealerHand.enqueue(shoe.dequeue());
         playerHand.enqueue(shoe.dequeue());
         dealerHand.enqueue(shoe.dequeue());
+    }
 
-        System.out.println(playerHand);
-        System.out.println(dealerHand);
+    // Determines player logic for the round.
+    // Returns true if player busted.
+    public static boolean playerPlays()
+    {
+        boolean busted = false;
 
-        //play loop//
-        int playerValue = playerHand.getValue();
-        int dealerValue = dealerHand.getValue();
-
-        // someone has blackjack
-        if(playerValue == 21 || dealerValue == 21)
-        {
-            if(playerValue > dealerValue)
-            {
-                System.out.println("Player Wins on initial blackjack!"); 
-                playerWins++;
-                gameOver = true;
-            }
-
-            else if(dealerValue > playerValue)
-            {
-                System.out.println("Dealer Wins on initial blackjack!"); 
-                dealerWins++;
-                gameOver = true;
-            }
-
-            else
-            {
-                System.out.println("Round ends in a draw on initial blackjack."); 
-                ties++;
-                gameOver = true;
-            }
-        }
-
-        //play round//
-        // player decides
-        while(playerHand.getValue() < 17 && (!gameOver) )
+        while(playerHand.getValue() < 17)
         {
             //hit
-            playerHand.enqueue(shoe.dequeue());
-            System.out.println("Player hit.");
-            System.out.println(playerHand);
+            Card hit = shoe.dequeue();
+            playerHand.enqueue(hit);
+            traceString.append("\nPlayer Hits: " + hit);
             
-
+            // player stands
             if((playerHand.getValue() >= 17) && (playerHand.getValue() < 22))
             {
-                //stand
-                System.out.println("Player stood.");
-                break;
+                traceString.append("\nPlayer Stands: " + playerHand + " : " + playerHand.getValue());
             }
 
+            // player busts
             else if(playerHand.getValue() > 21)
             {
-                //bust maybe do something to end round here?
-                System.out.println("Player Busted");
-                gameOver = true;
+                busted = true;
+                traceString.append("\nPlayer Busts: " + playerHand + " : " + playerHand.getValue());
+            }
+        }
+
+        return busted;
+    }
+
+    public static void dealerPlays()
+    {
+        while(dealerHand.getValue() < 17)
+        {
+            //hit
+            Card hit = shoe.dequeue();
+            dealerHand.enqueue(hit);
+            traceString.append("\nDealer Hits: " + hit);
+
+            // dealer stands
+            if((dealerHand.getValue() >= 17) && (dealerHand.getValue() < 22))
+            {
+                
+                traceString.append("\nDealer Stands: " + dealerHand + " : " + dealerHand.getValue());
+                break;
+            }
+
+            // delaer busts
+            else if(dealerHand.getValue() > 21)
+            {
+                traceString.append("\nDealer Busts: " + dealerHand + " : " + dealerHand.getValue());
                 break;
             }
 
         }
+    }
 
-        // dealer decides
-        if(!gameOver)
+    public static void determineWinner()
+    {
+        int dealerScore = dealerHand.getValue();
+        int playerScore = playerHand.getValue();
+        
+        // If someone busted
+        if(dealerScore > 21 || playerScore > 21)
         {
-            while(dealerHand.getValue() < 17)
+            // If delaer busted
+            if(dealerScore > playerScore)
             {
-                //hit
-                dealerHand.enqueue(shoe.dequeue());
-                System.out.println("Dealer hit.");
-                System.out.println(dealerHand);
-
-                if((dealerHand.getValue() >= 17) && (dealerHand.getValue() < 22))
-                {
-                    //stand
-                    System.out.println("Dealer stood.");
-                    break;
-                }
-
-                else if(dealerHand.getValue() > 21)
-                {
-                    //bust maybe do something to end round here?
-                    System.out.println("Dealer Busted");
-                    gameOver = true;
-                    break;
-                }
-
-            }
-
-        }
-
-        // finalize round//
-        if((dealerHand.getValue() < 21) && (playerHand.getValue() < 21))
-        {
-            //find winner
-            if(dealerHand.getValue() > playerHand.getValue())
-            {
-                System.out.println("Dealer wins round with a score of: " +
-                "\nDealer: " + dealerHand.getValue() + "\nPlayer: " + playerHand.getValue());
-
-                dealerWins++;
-            }
-
-            else if(playerHand.getValue() > dealerHand.getValue())
-            {
-                System.out.println("Player wins round with a score of: " +
-                "\nDealer: " + dealerHand.getValue() + "\nPlayer: " + playerHand.getValue());
+                traceString.append("\nPlayer Wins!");
 
                 playerWins++;
             }
 
+            // Else player busted
             else
             {
-                System.out.println("Round Tied." +
-                "\nDealer: " + dealerHand.getValue() + "\nPlayer: " + playerHand.getValue());
+                traceString.append("\nDealer Wins!");
 
-                ties++;
+                dealerWins++;
             }
+
+           
         }
 
+        // Else hand with highest score wins
+        else
+        {
+            // If player wins
+            if(playerScore > dealerScore)
+            {
+                traceString.append("\nPlayer Wins!");
+                playerWins++;
+            }
 
+            // else if dealer wins
+            else if(dealerScore > playerScore)
+            {
+                traceString.append("\nDealer Wins!");
+                dealerWins++;
+            }
 
+            // Else score is tied
+            else
+            {  
+                traceString.append("\nPush");
 
+                ties++;
 
+            }
+        }
+    }
 
+    // Removes the cards in the hands that are passed in the argument
+    public static void discard(BlackjackCards hand, int round)
+    {
+        int i = 0;
+        while(i < hand.size())
+        {
+            discardPile.enqueue(hand.dequeue());
+        }
+
+        hand.clear();
+
+        // Check if shoe needs refilled
+        if(discardPile.size() > (shoe.size()/4))
+        {
+            // Add discarded cards into shoe
+            while(i < discardPile.size())
+            {
+                shoe.enqueue(discardPile.dequeue());
+            }
+
+            shoe.shuffle();
+            System.out.println("\nReshuffling the shoe in round " + round);
+        }
 
     }
 
+    public static String showResults()
+    {
+        String results = "\nDealer Wins: " + dealerWins +
+                        " \nPlayer Wins: " + playerWins +
+                        "\nPushes: " + ties;
+
+        return results;
+    }
+
+    public static void main(String[] args)
+    {
+        // Initialize shoe and discard
+        initializeShoe(Integer.parseInt(args[1]));
+        discardPile = new BlackjackCards(shoe.capacity()/2); // Discard is half the size of shoe
+
+        // Initializing hands
+        playerHand = new BlackjackCards(5);
+        dealerHand = new BlackjackCards(5);
+        
+        // round begins here, using for loop to count # of rounds
+        for(int i = 0; i < Integer.parseInt(args[0]) ; i++)
+        {
+            traceString.append("\n\n\nRound " + (i+1) + " beginning");
+
+            dealCards();
+
+            traceString.append("\nPlayer: " + playerHand + " : " + playerHand.getValue());
+            traceString.append("\nDealer: " + dealerHand + " : " + dealerHand.getValue());
+
+            // If someone has blackjack on initial deal, determine winner
+            if(playerHand.getValue() == 21 || dealerHand.getValue() == 21)
+            {
+                determineWinner();
+            }
+
+            // else play continues
+            else
+            {
+                // if player busts
+                if(playerPlays())
+                {
+                    determineWinner();
+                }
+
+                // else player does not bust
+                else
+                {
+                    dealerPlays();
+                    determineWinner();
+                }
+
+            }
+
+            discard(playerHand, i + 1);
+            discard(dealerHand, i + 1);
+
+            // If round is a trace round, print trace string
+            if(Integer.parseInt(args[2]) > i)
+            {
+                System.out.println(traceString);
+            }
+            
+        }
+
+        System.out.println("\nAfter " + args[0] + " rounds, here are the results: "
+                            + showResults());
+
+    }
 
 }

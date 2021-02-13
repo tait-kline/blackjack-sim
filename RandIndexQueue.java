@@ -1,3 +1,7 @@
+// Tait Kline
+// This class is an array based queue implementaion. The array is resizable but will
+// not resize until the array is completely full.
+
 import java.util.Random;
 public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
 {
@@ -35,9 +39,6 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
         back = old.back;
 
     }
-
-
-
 
     public void enqueue(T newEntry)
     {
@@ -137,7 +138,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
 
         else
         {
-            return queue[front]; // Should this make a copy before returning?????
+            return queue[front];
         }
     }
 
@@ -304,25 +305,14 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
     public String toString()
     {
         String retString = "Contents: ";
-        /* testing
-        
-        retString = "\nFront: " + front +
-                    "\nBack: " + back +
-                    "\nCount: " + count +
-                    "\nLength: " + queue.length +
-                    "\nQueue: " ;
-        */
-    
-
+ 
         for (int i = 0 ; i < count ; i++)
         {
             T item = get(i);
             retString += item + " ";
         }
 
-        return retString;
-
-        
+        return retString;    
     }
    
 }
