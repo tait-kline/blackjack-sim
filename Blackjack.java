@@ -18,6 +18,7 @@ public class Blackjack
     public static void initializeShoe(int numOfDecks)
     {
         shoe = new BlackjackCards(52 * numOfDecks);
+        
          // Create cards for the shoe
          // This loop will repeat itereate for every deck needed
         for(int i = 0 ; i < numOfDecks ; i++)
@@ -53,14 +54,21 @@ public class Blackjack
     {
         boolean busted = false;
 
-        while(playerHand.getValue() < 17)
+        // if player takes initial stand
+        if((playerHand.getValue() >= 17) && (playerHand.getValue() < 22))
+        {
+            traceString.append("\nPlayer Stands: " + playerHand + " : " + playerHand.getValue());
+        }
+
+        
+        while(playerHand.getValue() < 17) // while player wants to hit
         {
             //hit
             Card hit = shoe.dequeue();
             playerHand.enqueue(hit);
             traceString.append("\nPlayer Hits: " + hit);
             
-            // player stands
+            // player stands after hit
             if((playerHand.getValue() >= 17) && (playerHand.getValue() < 22))
             {
                 traceString.append("\nPlayer Stands: " + playerHand + " : " + playerHand.getValue());
@@ -79,14 +87,20 @@ public class Blackjack
 
     public static void dealerPlays()
     {
-        while(dealerHand.getValue() < 17)
+        // if dealer takes initial stand
+        if((dealerHand.getValue() >= 17) && (dealerHand.getValue() < 22))
+        {
+            traceString.append("\nDealer Stands: " + dealerHand + " : " + dealerHand.getValue());
+        }
+
+        while(dealerHand.getValue() < 17)   // While dealer wants to hit
         {
             //hit
             Card hit = shoe.dequeue();
             dealerHand.enqueue(hit);
             traceString.append("\nDealer Hits: " + hit);
 
-            // dealer stands
+            // dealer stands after hit
             if((dealerHand.getValue() >= 17) && (dealerHand.getValue() < 22))
             {
                 
@@ -160,29 +174,38 @@ public class Blackjack
     }
 
     // Removes the cards in the hands that are passed in the argument
-    public static void discard(BlackjackCards hand, int round)
+    // and puts them into the discard pile
+    public static void discard(BlackjackCards hand)
     {
-        int i = 0;
-        while(i < hand.size())
+        while(0 != hand.size())
         {
             discardPile.enqueue(hand.dequeue());
+           
         }
 
-        hand.clear();
+    }
 
-        // Check if shoe needs refilled
-        if(discardPile.size() > (shoe.size()/4))
+    // checks if shoe needs replenished and does so if needed
+    // also reshuffles
+    // returns true if shoe is replenished and reshuffled
+    public static boolean checkShoe()
+    {
+        boolean shuffled = false;
+
+        if(discardPile.size() >= (shoe.capacity() * 0.75))
         {
+            shuffled = true;
+           
             // Add discarded cards into shoe
-            while(i < discardPile.size())
+            while(0 != discardPile.size())
             {
                 shoe.enqueue(discardPile.dequeue());
             }
 
             shoe.shuffle();
-            System.out.println("\nReshuffling the shoe in round " + round);
         }
 
+        return shuffled;
     }
 
     public static String showResults()
@@ -199,18 +222,20 @@ public class Blackjack
         // Initialize shoe and discard
         initializeShoe(Integer.parseInt(args[1]));
         discardPile = new BlackjackCards(shoe.capacity()/2); // Discard is half the size of shoe
-
+       
         // Initializing hands
-        playerHand = new BlackjackCards(5);
-        dealerHand = new BlackjackCards(5);
-        
+        playerHand = new BlackjackCards(10);
+        dealerHand = new BlackjackCards(10);
+
+        System.out.println("\nStarting Blackjack with " + args[0] + " rounds and " + args[1] + " decks in the shoe.");
+
         // round begins here, using for loop to count # of rounds
         for(int i = 0; i < Integer.parseInt(args[0]) ; i++)
         {
-            traceString.append("\n\n\nRound " + (i+1) + " beginning");
+            traceString.append("\n\nRound " + (i+1) + " beginning.");
 
             dealCards();
-
+            
             traceString.append("\nPlayer: " + playerHand + " : " + playerHand.getValue());
             traceString.append("\nDealer: " + dealerHand + " : " + dealerHand.getValue());
 
@@ -238,13 +263,21 @@ public class Blackjack
 
             }
 
-            discard(playerHand, i + 1);
-            discard(dealerHand, i + 1);
+            discard(playerHand);
+            discard(dealerHand);
 
+          
             // If round is a trace round, print trace string
             if(Integer.parseInt(args[2]) > i)
             {
                 System.out.println(traceString);
+                traceString = new StringBuilder();
+            }
+
+              
+            if(checkShoe())
+            {
+                System.out.println("\nReshuffling the shoe at the end of round " + (i+1));
             }
             
         }

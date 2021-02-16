@@ -14,6 +14,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
 
     // constructor that sets fornt and back to -1, this value will indicate
     // that the array is empty
+    @SuppressWarnings("unchecked")
     public RandIndexQueue(int size)
     {
         
@@ -24,6 +25,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
     }
 
     // copy constructor
+    @SuppressWarnings("unchecked")
     public RandIndexQueue (RandIndexQueue<T> old)
     {
         // create deep copy of array
@@ -142,6 +144,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void clear()
     {
         queue = (T[]) new Object[queue.length];
@@ -232,7 +235,7 @@ public class RandIndexQueue<T> implements MyQ<T>, Shufflable, Indexable<T>
 
     }
 	
-
+    @SuppressWarnings("unchecked")
     private void resize()
     {
         // Create an array 2x the size of current array
